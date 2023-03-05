@@ -532,7 +532,7 @@ const SecondBox = styled.div`
 >
 <div style = {{marginLeft:'40%', marginTop:'15%'}}>
 <Image src={eggimage} alt="level"  />
-<p style={{color:'#DF1133', fontSize:'100%', marginLeft:'-45px', marginTop:'10px'}}>NOW IT'S CLEAR</p>
+<p style={{color:'#DF1133', fontSize:'100%', marginLeft:'-45px', marginTop:'10px'}}>NOW IT&apos;S CLEAR</p>
 
 
 </div>
