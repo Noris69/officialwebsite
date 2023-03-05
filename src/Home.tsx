@@ -691,8 +691,8 @@ const Home = (props: HomeProps) => {
         marginLeft : '40%'
       }}
     >
-       <CollectionName>IT'S TIME</CollectionName>
-       <CollectionDescription>LET'S THE ADVENTURE BEGIN</CollectionDescription>
+       <CollectionName>IT&apos;S TIME</CollectionName>
+       <CollectionDescription>LET&apos;S THE ADVENTURE BEGIN</CollectionDescription>
 
     </div>
     <div style={{ marginLeft: '38%' }}>
