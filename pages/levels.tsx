@@ -341,27 +341,10 @@ background: rgba(255, 255, 255, 0.1);
 border-radius: 6px;  
 `
 
-export interface HomeProps {
-  candyMachineId: PublicKey;
-}
-const candyMachinOps = {
-  allowLists: [
-    {
-      list: require("../cmv3-demo-initialization/allowlist.json"),
-      groupLabel: "waoed",
-    },
-  ],
-};
-const Home = (props: HomeProps) => {
-  const { connection } = useConnection();
-  const wallet = useWallet();
-  const candyMachineV3 = useCandyMachineV3(
-    props.candyMachineId,
-    candyMachinOps
-  );
 
-  const [balance, setBalance] = useState<number>();
-  const [mintedItems, setMintedItems] = useState<Nft[]>();
+
+const Home = () => {
+  
 
   const [alertState, setAlertState] = useState<AlertState>({
     open: false,
@@ -369,62 +352,7 @@ const Home = (props: HomeProps) => {
     severity: undefined,
   });
 
-  const { guardLabel, guards, guardStates, prices } = useMemo(() => {
-    const guardLabel = defaultGuardGroup;
-    return {
-      guardLabel,
-      guards:
-        candyMachineV3.guards[guardLabel] ||
-        candyMachineV3.guards.default ||
-        {},
-      guardStates: candyMachineV3.guardStates[guardLabel] ||
-        candyMachineV3.guardStates.default || {
-        isStarted: true,
-        isEnded: false,
-        isLimitReached: false,
-        canPayFor: 10,
-        messages: [],
-        isWalletWhitelisted: true,
-        hasGatekeeper: false,
-      },
-      prices: candyMachineV3.prices[guardLabel] ||
-        candyMachineV3.prices.default || {
-        payment: [],
-        burn: [],
-        gate: [],
-      },
-    };
-  }, [
-    candyMachineV3.guards,
-    candyMachineV3.guardStates,
-    candyMachineV3.prices,
-  ]);
-  useEffect(() => {
-    console.log({ guardLabel, guards, guardStates, prices });
-  }, [guardLabel, guards, guardStates, prices]);
-  useEffect(() => {
-    (async () => {
-      if (wallet?.publicKey) {
-        const balance = await connection.getBalance(wallet.publicKey);
-        setBalance(balance / LAMPORTS_PER_SOL);
-      }
-    })();
-  }, [wallet, connection]);
-
-  useEffect(() => {
-    if (mintedItems?.length === 0) throwConfetti();
-  }, [mintedItems]);
-
-  const openOnSolscan = useCallback((mint) => {
-    window.open(
-      `https://solscan.io/address/${mint}${[WalletAdapterNetwork.Devnet, WalletAdapterNetwork.Testnet].includes(
-        network
-      )
-        ? `?cluster=${network}`
-        : ""
-      }`
-    );
-  }, []);
+ 
   const Box = styled.div`
   position: absolute;
   top: 120px;
@@ -443,181 +371,7 @@ const SecondBox = styled.div`
   opacity: 1;
 `;
 
-  const throwConfetti = useCallback(() => {
-    confetti({
-      particleCount: 400,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-  }, [confetti]);
-
-  const startMint = useCallback(
-    async (quantityString: number = 1) => {
-      const nftGuards: NftPaymentMintSettings[] = Array(quantityString)
-        .fill(undefined)
-        .map((_, i) => {
-          return {
-            burn: guards.burn?.nfts?.length
-              ? {
-                mint: guards.burn.nfts[i]?.mintAddress,
-              }
-              : undefined,
-            payment: guards.payment?.nfts?.length
-              ? {
-                mint: guards.payment.nfts[i]?.mintAddress,
-              }
-              : undefined,
-            gate: guards.gate?.nfts?.length
-              ? {
-                mint: guards.gate.nfts[i]?.mintAddress,
-              }
-              : undefined,
-          };
-        });
-
-      console.log({ nftGuards });
-      // debugger;
-      candyMachineV3
-        .mint(quantityString, {
-          groupLabel: guardLabel,
-          nftGuards,
-        })
-        .then((items) => {
-          setMintedItems(items as any);
-        })
-        .catch((e) =>
-          setAlertState({
-            open: true,
-            message: e.message,
-            severity: "error",
-          })
-        );
-    },
-    [candyMachineV3.mint, guards]
-  );
-  const [days, setDays] = useState(0);
-  const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(0);
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    const countDownDate = new Date().getTime() + 30 * 24 * 60 * 60 * 1000; // 30 days from now
-    const intervalId = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = countDownDate - now;
-
-      setDays(Math.floor(distance / (1000 * 60 * 60 * 24)));
-      setHours(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-      setMinutes(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)));
-      setSeconds(Math.floor((distance % (1000 * 60)) / 1000));
-
-      if (distance < 0) {
-        clearInterval(intervalId);
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-  useEffect(() => {
-    console.log({ candyMachine: candyMachineV3.candyMachine });
-  }, [candyMachineV3.candyMachine]);
-
-  const MintButton = ({
-    gatekeeperNetwork,
-  }: {
-    gatekeeperNetwork?: PublicKey;
-  }) => (
-    <MultiMintButton
-      candyMachine={candyMachineV3.candyMachine}
-      gatekeeperNetwork={gatekeeperNetwork}
-      isMinting={candyMachineV3.status.minting}
-      setIsMinting={() => { }}
-      isActive={!!candyMachineV3.items.remaining}
-      isEnded={guardStates.isEnded}
-      isSoldOut={!candyMachineV3.items.remaining}
-      guardStates={guardStates}
-      onMint={startMint}
-      prices={prices}
-    />
-  );
-
-  const solCost = useMemo(
-    () =>
-      prices
-        ? prices.payment
-          .filter(({ kind }) => kind === "sol")
-          .reduce((a, { price }) => a + price, 0)
-        : 0,
-    [prices]
-  );
-
-  const tokenCost = useMemo(
-    () =>
-      prices
-        ? prices.payment
-          .filter(({ kind }) => kind === "token")
-          .reduce((a, { price }) => a + price, 0)
-        : 0,
-    [prices]
-  );
-
-  let candyPrice = null;
-   if (prices.payment.filter(({kind}) => kind === "token").reduce((a, { kind }) => a + kind, "")) {
-    candyPrice = `${tokenCost} Token`
-  } else if (prices.payment.filter(({kind}) => kind === "sol").reduce((a, { price }) => a + price, 0)) {
-    candyPrice = `◎ ${solCost}`
-  } else {
-    candyPrice = "1 NFT"
-  }
-
-  console.log(candyPrice);
-  // Icons
-
-  const Globe = (props) => (
-    <svg
-      width={30}
-      height={30}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M15 1.667A20.4 20.4 0 0 1 20.333 15 20.4 20.4 0 0 1 15 28.333m0-26.666A20.4 20.4 0 0 0 9.667 15 20.4 20.4 0 0 0 15 28.333m0-26.666C7.636 1.667 1.667 7.637 1.667 15c0 7.364 5.97 13.333 13.333 13.333m0-26.666c7.364 0 13.333 5.97 13.333 13.333 0 7.364-5.97 13.333-13.333 13.333M2.333 11h25.334M2.333 19h25.334"
-        stroke="#fff"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-  const Twitter = (props) => (
-    <svg
-      width={28}
-      height={23}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M8.789 23c-3.235 0-6.25-.94-8.789-2.564 2.155.14 5.958-.195 8.324-2.451-3.559-.163-5.164-2.893-5.373-4.059.302.117 1.744.257 2.558-.07C1.416 12.83.788 9.237.927 8.141c.768.536 2.07.723 2.582.676-3.814-2.729-2.442-6.834-1.767-7.72 2.737 3.792 6.84 5.922 11.914 6.04a5.866 5.866 0 0 1-.146-1.305C13.51 2.61 16.113 0 19.325 0a5.79 5.79 0 0 1 4.25 1.853c1.122-.263 2.81-.878 3.634-1.41-.416 1.493-1.71 2.738-2.493 3.2.006.016-.007-.016 0 0 .688-.104 2.549-.462 3.284-.96-.364.838-1.736 2.233-2.862 3.013C25.348 14.938 18.276 23 8.788 23Z"
-        fill="#fff"
-      />
-    </svg>
-  )
-  const Discord = (props) => (
-    <svg
-      width={28}
-      height={21}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M24.532 2.66C22.605.98 20.294.14 17.853 0l-.385.42c2.183.56 4.11 1.68 5.908 3.22-2.183-1.26-4.624-2.1-7.193-2.38-.77-.14-1.412-.14-2.183-.14-.77 0-1.413 0-2.184.14-2.568.28-5.009 1.12-7.192 2.38C6.422 2.1 8.349.98 10.532.42L10.147 0c-2.44.14-4.753.98-6.68 2.66C1.285 7.14.129 12.18 0 17.36 1.927 19.6 4.624 21 7.45 21c0 0 .899-1.12 1.54-2.1-1.669-.42-3.21-1.4-4.238-2.94.9.56 1.798 1.12 2.698 1.54 1.155.56 2.311.84 3.467 1.12 1.028.14 2.056.28 3.083.28 1.027 0 2.055-.14 3.083-.28 1.155-.28 2.312-.56 3.468-1.12.899-.42 1.798-.98 2.697-1.54-1.028 1.54-2.57 2.52-4.239 2.94.642.98 1.541 2.1 1.541 2.1 2.826 0 5.523-1.4 7.45-3.64-.128-5.18-1.284-10.22-3.468-14.7ZM9.762 14.84c-1.285 0-2.44-1.26-2.44-2.8 0-1.54 1.155-2.8 2.44-2.8 1.284 0 2.44 1.26 2.44 2.8 0 1.54-1.156 2.8-2.44 2.8Zm8.476 0c-1.284 0-2.44-1.26-2.44-2.8 0-1.54 1.156-2.8 2.44-2.8 1.285 0 2.44 1.26 2.44 2.8 0 1.54-1.155 2.8-2.44 2.8Z"
-        fill="#fff"
-      />
-    </svg>
-  )
+  
 
 
 
@@ -876,18 +630,7 @@ const SecondBox = styled.div`
 </div>
         
       </>
-      <Snackbar
-        open={alertState.open}
-        autoHideDuration={6000}
-        onClose={() => setAlertState({ ...alertState, open: false })}
-      >
-        <Alert
-          onClose={() => setAlertState({ ...alertState, open: false })}
-          severity={alertState.severity}
-        >
-          {alertState.message}
-        </Alert>
-      </Snackbar> 
+      
     </main>
   );
 };
