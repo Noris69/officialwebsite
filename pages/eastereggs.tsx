@@ -675,17 +675,7 @@ const SecondBox = styled.div`
   </Link>
   </div>
   
-          <WalletContainer>
-            <Wallet>
-              {wallet ? (
-                
-                  <ConnectButton />
-                
-              ) : (
-                <ConnectButton>Connect Wallet</ConnectButton>
-              )}
-            </Wallet>
-          </WalletContainer>
+          
           
         </Header>
         <div

@@ -674,17 +674,7 @@ const SecondBox = styled.div`
   </Link>
   </div>
   
-          <WalletContainer>
-            <Wallet>
-              {wallet ? (
-                
-                  <ConnectButton />
-                
-              ) : (
-                <ConnectButton>Connect Wallet</ConnectButton>
-              )}
-            </Wallet>
-          </WalletContainer>
+          
           
         </Header>
         <div
@@ -786,7 +776,7 @@ const SecondBox = styled.div`
   }}
 >
 <p style={{marginTop:'4.2%', fontSize:'120%', marginLeft:'5%', color:'#DF1133'}}>GAME RULES :</p>
-<div style={{marginTop:'5%'}}>
+<div style={{marginTop:'20px'}}>
   <p style={{marginTop:'2%', fontSize:'90%', marginLeft:'6%'}}>- ONLY 1 NFT PER WALLET</p>
   <p style={{marginTop:'2%', fontSize:'90%', marginLeft:'6%'}}>- YOU HAVE 10 TRIES PER LEVEL</p>
   <p style={{marginTop:'2%', fontSize:'90%', marginLeft:'6%'}}>- YOU HAVE 20 TRIES IN TOTAL FOR EASTER EGGS</p>
@@ -873,7 +863,7 @@ const SecondBox = styled.div`
   }}
 >
 <p style={{marginTop:'1.5%', fontSize:'120%', marginLeft:'3%', color:'#DF1133'}}>MAY HELP YOU !</p>
-<div style={{marginTop:'5%'}}>
+<div style={{marginTop:'20px'}}>
   <p style={{marginTop:'0.5%', fontSize:'90%', marginLeft:'2%'}}>- LOT OF HINTS ARE DISPERSED AVERYWHERE ON OUR DISCORD SERVER AND TWITTER</p>
   <p style={{marginTop:'0.5%', fontSize:'90%', marginLeft:'2%'}}>- YOU CAN GET SOME EASTER EGGS EVEN BEFORE START THE ADVENTURE</p>
   <p style={{marginTop:'0.5%', fontSize:'90%', marginLeft:'2%'}}>- SOMETIMES IF IT DOESN'T WORK IN WORDS, TRY LETTERS, AND VICE VERSA</p>
